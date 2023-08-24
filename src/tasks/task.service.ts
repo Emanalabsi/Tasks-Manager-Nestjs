@@ -3,6 +3,7 @@ import { Task } from './entities/task.entity';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreateTaskDto } from './dto/task-create.dto';
+import { UpdateTaskDto } from './dto/task-update.dto';
 CreateTaskDto;
 @Injectable()
 export class TasksService {
@@ -19,13 +20,27 @@ export class TasksService {
     return this.taskRepository.save(newTask);
   }
 
-  deleteTask(id: number) {
-    const taskToDelete = this.taskRepository.findOneBy({ id });
+  async deleteTask(id: number) {
+    const taskToDelete = await this.taskRepository.findOneBy({ id });
     if (!taskToDelete) {
       throw new NotFoundException('Task not found');
     }
 
     this.taskRepository.delete({ id });
     return 'Task deleted successfully';
+  }
+
+  async updateTask(id: number, updateTaskDto: UpdateTaskDto) {
+    const taskToUpdate = await this.taskRepository.findOneBy({ id });
+    if (!taskToUpdate) {
+      throw new NotFoundException('Task not found');
+    }
+    if (updateTaskDto.content) {
+      taskToUpdate.content = updateTaskDto.content;
+    }
+    if (updateTaskDto.title) {
+      taskToUpdate.title = updateTaskDto.title;
+    }
+    return this.taskRepository.save(taskToUpdate);
   }
 }
